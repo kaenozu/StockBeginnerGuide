@@ -14,6 +14,21 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  app.get("/api/stock/:ticker", async (req, res) => {
+    const { ticker } = req.params;
+    const apiKey = process.env.ALPHA_VANTAGE_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: "API Key not configured" });
+    }
+    try {
+      const response = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${ticker}&apikey=${apiKey}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stock data" });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

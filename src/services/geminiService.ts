@@ -44,6 +44,45 @@ export async function analyzeStock(query: string): Promise<StockAnalysis> {
   }
 }
 
+export async function analyzeAllStocks(): Promise<StockAnalysis[]> {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not configured.");
+  }
+
+  const stockList = TRADABLE_STOCKS.map(s => `${s.name} (${s.ticker})`).join(", ");
+  const prompt = `以下の銘柄リストの全てについて、現在の市場環境に基づいた分析と、短期的な予測（上昇傾向、下降傾向、横ばい）を教えてください。また、その中から特に推奨する銘柄をいくつか選んでください。
+  
+  銘柄リスト: ${stockList}`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              ticker: { type: Type.STRING },
+              name: { type: Type.STRING },
+              trend: { type: Type.STRING, enum: ["上昇", "下降", "横ばい"] },
+              score: { type: Type.NUMBER },
+              summary: { type: Type.STRING }
+            },
+            required: ["ticker", "name", "trend", "score", "summary"]
+          }
+        }
+      }
+    });
+    return JSON.parse(response.text);
+  } catch (error) {
+    console.error("Gemini API Error:", error);
+    throw new Error("全銘柄の分析中にエラーが発生しました。");
+  }
+}
+
 export async function analyzeSellTiming(ticker: string): Promise<StockAnalysis> {
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("GEMINI_API_KEY is not configured.");

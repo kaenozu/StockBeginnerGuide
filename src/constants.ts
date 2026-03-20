@@ -9,4 +9,9 @@ export const TRADABLE_STOCKS = [
   { ticker: "8001", name: "伊藤忠商事" },
   { ticker: "9983", name: "ファーストリテイリング" },
   { ticker: "6981", name: "村田製作所" },
+  { ticker: "7267", name: "ホンダ" },
+  { ticker: "6752", name: "パナソニック" },
+  { ticker: "8035", name: "東京エレクトロン" },
+  { ticker: "6861", name: "キーエンス" },
+  { ticker: "4063", name: "信越化学工業" },
 ];
